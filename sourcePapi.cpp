@@ -4,17 +4,18 @@
 #include <vector>
 #include <stdio.h>
 #include "papi.h"
+#include <omp.h>
 
 using namespace std;
 
-#define SIZE 10
-#define REPETITIONS 2
-#define NUM_EVENTS 4
+#define SIZE 100
+#define REPETITIONS 1
+#define NUM_EVENTS 2
 
 float m1[SIZE][SIZE],m2[SIZE][SIZE],result[SIZE][SIZE];
 
 long long values[NUM_EVENTS];
-int Events[NUM_EVENTS] = {PAPI_FP_INS,PAPI_SR_INS,PAPI_LD_INS,PAPI_BR_INS};
+int Events[NUM_EVENTS] = {PAPI_TOT_INS,PAPI_L1_TCM};
 //			 {PAPI_FP_INS,PAPI_SR_INS,PAPI_LD_INS,PAPI_BR_INS,PAPI_VEC_SP,PAPI_VEC_DP,
 //			  PAPI_FP_OPS,PAPI_SP_OPS,PAPI_DP_OPS,PAPI_TOT_INS,
 //			  PAPI_L1_TCM,PAPI_L2_TCM,PAPI_L1_TCA,PAPI_L2_TCA,PAPI_TOT_CYC};
@@ -23,26 +24,39 @@ int retval;
 
 void printEvents(int rep) {
 	printf("---- REP %d ----\n",rep);
-	printf("PAPI_FP_INS: %lld\n",values[0]);
-	printf("PAPI_SR_INS: %lld\n",values[1]);
-	printf("PAPI_LD_INS: %lld\n",values[2]);
-	printf("PAPI_BR_INS: %lld\n",values[3]);
+	printf("PAPI_TOT_INS: %lld\n",values[0]);
+	printf("PAPI_L1_TCM: %lld\n",values[1]);
+}
+
+void matrixMult5(float** mat1, float** mat2, float** res){
+    int i,j,k;
+
+    for(k=0;k<SIZE;k++)
+    {
+        for(i=0;i<SIZE;i++)
+        {
+            for(j=0;j<SIZE;j++)
+            {
+                res[i][j] += mat1[i][k] * mat2[k][j];
+            }
+        }
+    }
 }
 
 void matrixMult(float** mat1, float** mat2, float** res){
     int i,j,k;
-		float sum;
+		//float sum;
 
     for(i=0;i<SIZE;i++)
     {
         for(j=0;j<SIZE;j++)
         {
-						sum = 0;
+						//sum = 0;
             for(k=0;k<SIZE;k++)
             {
-                sum += mat1[i][k] * mat2[k][j];
+                res[i][j] += mat1[i][k] * mat2[k][j];
             }
-						res[i][j] = sum;
+						//res[i][j] = sum;
         }
     }
 }
@@ -52,6 +66,7 @@ void fillMatrices(void) {
     	  for (unsigned j = 0; j < SIZE; ++j) {
 			       m1[i][j] = ((float) rand()) / ((float) RAND_MAX);
 			       m2[i][j] = ((float) rand()) / ((float) RAND_MAX);
+						 //m2[i][j] = 1;
 			       result[i][j]  = 0;
 		}
 	}
@@ -89,8 +104,10 @@ int main(int argc, char *argv[]){
 	for (unsigned i = 0; i < SIZE; ++i){
 		for (unsigned j = 0; j < SIZE; ++j) {
 			mat1[i][j] = m1[i][j];
-			//mat2[i][j] = m2[i][j];
-			mat2[j][i] = m2[i][j]; //trasnpose
+			/* normal */
+			mat2[i][j] = m2[i][j];
+			/* transpose */
+			//mat2[j][i] = m2[i][j];
       result[i][j] = res[i][j];
 		}
 	}
@@ -102,13 +119,19 @@ int main(int argc, char *argv[]){
 		}
 		clearcache = new double [3300000];
 
+		double time = omp_get_wtime();
+
 		PAPI_start_counters(Events,NUM_EVENTS);
 		matrixMult(mat1, mat2, res);
 		int retval = PAPI_stop_counters(values,NUM_EVENTS);
+
+		time = omp_get_wtime() - time;
+
+		printf("\n*** Time: %f ***\n",time);
 
 		printEvents(i);
 	}
   	//printMatrice(res);
 
-	return 1;
+	return 0;
 }
