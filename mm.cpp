@@ -8,8 +8,8 @@
 
 using namespace std;
 
-#define SIZE 10
-#define REPETITIONS 4
+#define SIZE 500
+#define REPETITIONS 8
 #define NUM_EVENTS 4
 
 //int Events[NUM_EVENTS] = {PAPI_L1_TCM,PAPI_L2_TCM,PAPI_L3_TCM,PAPI_BR_INS};
@@ -74,7 +74,7 @@ void printMatrice(float** res){
   }
 }
 
-int comp (const void * elem1, const void * elem2) 
+int comp (const void * elem1, const void * elem2)
 {
     double f = *((double*)elem1);
    	double s = *((double*)elem2);
@@ -110,29 +110,29 @@ int main(int argc, char *argv[]){
 			//mat2[j][i] = m2[i][j];
 	  result[i][j] = res[i][j];
 		}
-	}	
+	}
 
 
 	//faz a medição do tempo
 	double time[REPETITIONS];
-	for (unsigned i = 0; i < REPETITIONS; i++) 
+	for (unsigned i = 0; i < REPETITIONS; i++)
 	{
 
-		if(clearcache != NULL) 
+		if(clearcache != NULL)
 		{
 			free(clearcache);
 		}
 		clearcache = new double [3300000];
-		
+
 
 		time[i] = omp_get_wtime();
 		matrixMult(mat1, mat2, res);
 		time[i] = omp_get_wtime() - time[i];
-		
+
 	}
 	qsort (time, sizeof(time)/sizeof(*time), sizeof(*time), comp);
 	f = fopen("timeResults.txt","w");
-	for (unsigned i = 0; i < REPETITIONS; i++) 
+	for (unsigned i = 0; i < REPETITIONS; i++)
 	{
 		fprintf(f,"%f\n",time[i]*1000);
 	}
@@ -145,12 +145,12 @@ int main(int argc, char *argv[]){
 	retval = PAPI_add_events(EventSet,Events,NUM_EVENTS);
 	f = fopen("Results.txt","w");
 	for (unsigned i = 0; i < REPETITIONS; i++) {
-		
+
 		if(clearcache != NULL) {
 			free(clearcache);
 		}
 		clearcache = new double [3300000];
-		
+
 
 		PAPI_start_counters(Events,NUM_EVENTS);
 		matrixMult(mat1, mat2, res);
