@@ -8,22 +8,22 @@
 
 using namespace std;
 
-#define SIZE 100
+#define SIZE 50
 #define REPETITIONS 8
 #define NUM_EVENTS 1
 
 float m1[SIZE][SIZE],m2[SIZE][SIZE],result[SIZE][SIZE];
 
 long long values[NUM_EVENTS];
-int Events[NUM_EVENTS] = {PAPI_L2_DCM};
 //int Events[NUM_EVENTS] = {PAPI_L2_TCM};
+int Events[NUM_EVENTS] = {PAPI_L2_TCA};
 //int Events[NUM_EVENTS] = {PAPI_BR_INS};
 //int Events[NUM_EVENTS] = {PAPI_L1_TCA};
 //int Events[NUM_EVENTS] = {PAPI_LD_INS};
 //int Events[NUM_EVENTS] = {PAPI_SR_INS};
-//int Events[NUM_EVENTS] = {PAPI_TOT_INS}
+//int Events[NUM_EVENTS] = {PAPI_TOT_INS};
 //int Events[NUM_EVENTS] = {PAPI_TOT_CYC};
-//int Events[NUM_EVENTS] = {PAPI_FP_INS}:
+//int Events[NUM_EVENTS] = {PAPI_FP_INS};
 //int Events[NUM_EVENTS] = {PAPI_FP_OPS};
 
 int EventSet;
@@ -37,16 +37,18 @@ void printEvents(int rep) {
 
 void matrixMult5(float** mat1, float** mat2, float** res){
     int i,j,k;
+		float aux;
 
     for(k=0;k<SIZE;k++)
     {
         for(i=0;i<SIZE;i++)
         {
+						aux = mat1[k][i];
             for(j=0;j<SIZE;j++)
             {
-								res[i][j] += mat1[i][k] * mat2[k][j];
+								//res[i][j] += mat1[i][k] * mat2[k][j];
 								/* transpose */
-								//res[i][j] += mat1[i][k] * mat2[j][k];
+								res[i][j] += mat1[k][i] * mat2[k][j];
             }
         }
     }
@@ -56,6 +58,7 @@ void matrixMult(float** mat1, float** mat2, float** res){
     int i,j,k;
 		//float sum;
 
+		#pragma vector always
     for(i=0;i<SIZE;i++)
     {
         for(j=0;j<SIZE;j++)
@@ -138,8 +141,8 @@ int main(int argc, char *argv[]){
 
 		time = omp_get_wtime() - time;
 
-		printEvents(i);
-		//printf("%f\n",time);
+		//printEvents(i);
+		printf("%f\n",time*1000); //*1000 in miliseconds
 	}
   //printMatrice(res);
 
