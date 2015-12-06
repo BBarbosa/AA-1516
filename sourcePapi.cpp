@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#define SIZE 50
+#define SIZE 500
 #define REPETITIONS 8
 #define NUM_EVENTS 1
 
@@ -16,14 +16,14 @@ float m1[SIZE][SIZE],m2[SIZE][SIZE],result[SIZE][SIZE];
 
 long long values[NUM_EVENTS];
 //int Events[NUM_EVENTS] = {PAPI_L2_TCM};
-int Events[NUM_EVENTS] = {PAPI_L2_TCA};
+//int Events[NUM_EVENTS] = {PAPI_L2_TCA};
 //int Events[NUM_EVENTS] = {PAPI_BR_INS};
 //int Events[NUM_EVENTS] = {PAPI_L1_TCA};
 //int Events[NUM_EVENTS] = {PAPI_LD_INS};
 //int Events[NUM_EVENTS] = {PAPI_SR_INS};
 //int Events[NUM_EVENTS] = {PAPI_TOT_INS};
 //int Events[NUM_EVENTS] = {PAPI_TOT_CYC};
-//int Events[NUM_EVENTS] = {PAPI_FP_INS};
+int Events[NUM_EVENTS] = {PAPI_VEC_SP};
 //int Events[NUM_EVENTS] = {PAPI_FP_OPS};
 
 int EventSet;
@@ -141,8 +141,8 @@ int main(int argc, char *argv[]){
 
 		time = omp_get_wtime() - time;
 
-		//printEvents(i);
-		printf("%f\n",time*1000); //*1000 in miliseconds
+		printEvents(i);
+		//printf("%f\n",time*1000); //*1000 in miliseconds
 	}
   //printMatrice(res);
 
